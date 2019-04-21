@@ -1,0 +1,29 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "MLN_GrapplingHook",
+  "Description": "Grappling hook mechanic (Pulling hit objects, launching owner to hit object, swinging owner from hit point)",
+  "Category": "Other",
+  "CreatedBy": "Matteo Lorenzo Nasci",
+  "CreatedByURL": "https://github.com/MatteoNasci",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": false,
+  "IsBetaVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "MLN_GrapplingHook",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [ 
+    { 
+      "Name": "CableComponent",
+      "Enabled": true 
+    } 
+  ]
+}
