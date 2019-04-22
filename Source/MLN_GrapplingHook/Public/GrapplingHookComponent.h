@@ -137,6 +137,9 @@ UCLASS(BlueprintType, Blueprintable, ClassGroup=(Grapple), meta=(BlueprintSpawna
 class MLN_GRAPPLINGHOOK_API UGrapplingHookComponent : public UActorComponent
 {
 	GENERATED_BODY()
+private:
+	float CurrentRetractDuration;
+	FVector RetractStartLocation;
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Config|Dispatchers")
 	/* Event invoked when an error occurs

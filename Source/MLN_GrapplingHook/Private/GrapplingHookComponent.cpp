@@ -27,6 +27,7 @@ UGrapplingHookComponent::UGrapplingHookComponent()
 
 	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
 
+
 	bInitializeCoreOnBeginPlay = true;
 	bInitializeNonCoreOnBeginPlay = true;
 
@@ -50,6 +51,7 @@ UGrapplingHookComponent::UGrapplingHookComponent()
 
 	RetractDistanceTollerance = 100.f;
 	RetractDuration = 0.5f;
+	CurrentRetractDuration = RetractDuration;
 
 	GroundedCheckDelay = 0.15f;
 	HookClass = AProjectileHook::StaticClass();
@@ -263,9 +265,9 @@ void UGrapplingHookComponent::UpdateRetractGrapple(const float Deltatime)
 		}
 
 		const FVector HookLocation = Hook->GetActorLocation();
-		const float Alpha = FMath::Clamp((RetractDuration == 0.f ? 1.f : RetractTime / RetractDuration), 0.f, 1.f);
+		const float Alpha = FMath::Clamp((CurrentRetractDuration == 0.f ? 1.f : RetractTime / CurrentRetractDuration), 0.f, 1.f);
 
-		const FVector NewLocation = UKismetMathLibrary::VEase(HookLocation, StartLocation, Alpha, EEasingFunc::Type::Linear);
+		const FVector NewLocation = UKismetMathLibrary::VEase(RetractStartLocation, StartLocation, Alpha, EEasingFunc::Type::Linear);
 		const FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, HookLocation);
 		Hook->SetActorLocationAndRotation(NewLocation, NewRotation, false, (FHitResult*)nullptr, ETeleportType::TeleportPhysics);
 
@@ -593,7 +595,9 @@ void UGrapplingHookComponent::StopGrapple()
 	}
 
 	bool bValid;
-	RetractTime = BreakDistance == 0.f ? 0.f : (RetractDuration * (1.0f - (GetGrappleLength(bValid) / BreakDistance)));
+	RetractTime = 0.f;
+	CurrentRetractDuration = BreakDistance == 0.f ? RetractDuration : (RetractDuration * (GetGrappleLength(bValid) / BreakDistance));
+	RetractStartLocation = GetGrappleEndLocation(bValid);
 
 	GrappledObject = nullptr;
 	PreRetractingState = CurrentState;
@@ -656,6 +660,7 @@ UPrimitiveComponent* UGrapplingHookComponent::StartActiveGrapplePhase(UPrimitive
 {
 	this->GrappledObject = InGrappledObject;
 	RetractTime = 0.f;
+	CurrentRetractDuration = RetractDuration;
 
 	SetComponentTickEnabled(true);
 
