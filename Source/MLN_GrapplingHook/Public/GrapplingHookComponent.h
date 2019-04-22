@@ -20,7 +20,8 @@ enum class EGrapplingHookActivation : uint8
 	/* Launch feature enabled
 	*/
 	GA_Launch = 1 << 1 UMETA(DisplayName = "Launch"),
-	/* Swing feature enabled
+	/* Swing feature enabled. 
+	 *@warning To work correctly the Character CapsuleCollider needs to be the only physics component with SetEnabledCollision active, otherwise the Character will remain 'hanging' from the hit surface
 	*/
 	GA_Swing = 1 << 2 UMETA(DisplayName = "Swing"),
 	/* Retracting feature enabled
@@ -140,6 +141,7 @@ class MLN_GRAPPLINGHOOK_API UGrapplingHookComponent : public UActorComponent
 private:
 	float CurrentRetractDuration;
 	FVector RetractStartLocation;
+	bool bActivatedSwing;
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Config|Dispatchers")
 	/* Event invoked when an error occurs

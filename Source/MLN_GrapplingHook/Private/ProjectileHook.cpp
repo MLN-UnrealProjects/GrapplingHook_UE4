@@ -71,7 +71,7 @@ void AProjectileHook::OnStopped(const FHitResult& Hit)
 	InterruptProjectileMovement(false);
 
 	OnHookStopped.Broadcast(Hit.ImpactNormal, Hit.Component.Get());
-	
+
 	if (CollisionComponent)
 	{
 		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
@@ -79,8 +79,9 @@ void AProjectileHook::OnStopped(const FHitResult& Hit)
 
 	ReleaseContrainedBody();
 
-	FAttachmentTransformRules Rules(EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, false);
-	AttachToComponent(Hit.Component.Get(), Rules);
+	FAttachmentTransformRules Rules(EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
+	//AttachToActor(Hit.GetActor(), Rules);
+	AttachToComponent(Hit.GetComponent(), Rules);
 }
 void AProjectileHook::InterruptProjectileMovement(const bool bLaunchStoppedEvent)
 {
@@ -115,6 +116,7 @@ void AProjectileHook::SetCable(UCableComponent* const InCable)
 void AProjectileHook::ReleaseContrainedBody()
 {
 	FDetachmentTransformRules Rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
-	DetachFromActor(Rules);
+	RootComponent->DetachFromComponent(Rules);
+	//DetachFromActor(Rules);
 }
 

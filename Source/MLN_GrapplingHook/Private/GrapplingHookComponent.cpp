@@ -27,7 +27,7 @@ UGrapplingHookComponent::UGrapplingHookComponent()
 
 	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
 
-
+	bActivatedSwing = false;
 	bInitializeCoreOnBeginPlay = true;
 	bInitializeNonCoreOnBeginPlay = true;
 
@@ -173,17 +173,21 @@ bool UGrapplingHookComponent::ActivateSwing()
 		return false;
 	}
 	//Activate already executed
-	if (Capsule->IsSimulatingPhysics())
+	if (bActivatedSwing)
 	{
 		return true;
 	}
 
-	MoveComponent->SetActive(false);
+	bActivatedSwing = true;
+
 	Capsule->SetSimulatePhysics(true);
+	MoveComponent->SetActive(false);
 
 	bool bValid;
 	SwingConstraint->SetWorldLocation(GetGrappleEndLocation(bValid), false, (FHitResult*)nullptr, ETeleportType::TeleportPhysics);
 	SwingConstraint->SetConstrainedComponents(GrappledObject, NAME_None, Capsule, NAME_None);
+	SwingConstraint->UpdateConstraintFrames();
+
 	if (!bValid)
 	{
 		OnGrappleError.Broadcast(EGrapplingHookError::GE_SwingActivationCore);
@@ -399,6 +403,7 @@ void UGrapplingHookComponent::LaunchGrapple()
 	}
 
 	Hook = SpawnedHook;
+	Hook->ReleaseContrainedBody();
 	Hook->MaxDistance = BreakDistance;
 	Cable->SetVisibility(true, true);
 	Hook->SetCable(Cable);
@@ -559,6 +564,8 @@ AProjectileHook* UGrapplingHookComponent::GetHook() const
 }
 void UGrapplingHookComponent::StopGrapple()
 {
+	bActivatedSwing = false;
+
 	if (Hook)
 	{
 		Hook->InterruptProjectileMovement(true);
@@ -658,9 +665,11 @@ void UGrapplingHookComponent::DetachGrappledObject()
 }
 UPrimitiveComponent* UGrapplingHookComponent::StartActiveGrapplePhase(UPrimitiveComponent* const InGrappledObject)
 {
+	bActivatedSwing = false;
 	this->GrappledObject = InGrappledObject;
 	RetractTime = 0.f;
 	CurrentRetractDuration = RetractDuration;
+	RetractStartLocation = FVector::ZeroVector;
 
 	SetComponentTickEnabled(true);
 
