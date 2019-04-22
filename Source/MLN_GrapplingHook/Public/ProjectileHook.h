@@ -43,13 +43,13 @@ public:
 	/* Releases the actor from the attached grappled object
 	*/
 	virtual void ReleaseContrainedBody();
-	/* Detaches previous cable and attaches new cable to this actor
+	/* Detaches previous cable and attaches new cable to this actor, activating its components
 	*/
-	virtual void SetCable(UCableComponent* const InCable);
+	virtual void StartSimulation(UCableComponent* const InCable);
 	/* Manually interrupts the projectile movement, optionally launching the OnHookStopped event
 	*/
 	virtual void InterruptProjectileMovement(const bool bLaunchStoppedEvent = false);
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Destroyed() override;
 protected:
 	UFUNCTION()
 	/* Function binded to ProjectileMovementComponent OnProjectileStop

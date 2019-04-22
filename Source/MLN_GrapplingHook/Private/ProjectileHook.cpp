@@ -41,7 +41,7 @@ AProjectileHook::AProjectileHook()
 		CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		CollisionComponent->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
 		CollisionComponent->InitSphereRadius(10.f);
-		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 		CollisionComponent->SetCanEverAffectNavigation(false);
 		if (ProjectileMovement)
 		{
@@ -60,9 +60,10 @@ void AProjectileHook::Tick(float DeltaSeconds)
 		InterruptProjectileMovement(true);
 	}
 }
-void AProjectileHook::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AProjectileHook::Destroyed()
 {
-	SetCable(nullptr);
+	Super::Destroyed();
+	StartSimulation(nullptr);
 	InterruptProjectileMovement();
 	ReleaseContrainedBody();
 }
@@ -99,7 +100,7 @@ void AProjectileHook::InterruptProjectileMovement(const bool bLaunchStoppedEvent
 		ProjectileMovement->StopSimulating(Hit);
 	}
 }
-void AProjectileHook::SetCable(UCableComponent* const InCable)
+void AProjectileHook::StartSimulation(UCableComponent* const InCable)
 {
 	if (Cable)
 	{
@@ -108,6 +109,7 @@ void AProjectileHook::SetCable(UCableComponent* const InCable)
 	Cable = InCable;
 	if (Cable)
 	{
+		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 		Cable->bAttachEnd = true;
 		Cable->SetAttachEndTo(this, NAME_None);
 		Cable->EndLocation = FVector::ZeroVector;

@@ -143,6 +143,7 @@ private:
 	FVector RetractStartLocation;
 	bool bActivatedSwing;
 public:
+
 	UPROPERTY(BlueprintAssignable, Category = "Config|Dispatchers")
 	/* Event invoked when an error occurs
 	*/
@@ -241,6 +242,7 @@ protected:
 
 public:	
 	UGrapplingHookComponent();
+	void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Config|Grapple|Miss", meta = (ClampMin = 0.f, UIMin = 0.f))
 	/* Cooldown time used after a missed grapple
@@ -612,8 +614,6 @@ public:
 	*@return The resulting Flag diff
 	*/
 	uint8 DiffUFlags(const uint8 First, const uint8 Second) const;
-
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 protected:
 	/* Sends the grappling hook into disabled state and starts the cooldown. If GA_Cooldown feature is not enabled the grapple will go directly to Ready
 	*@param Cooldown  Time to wait before grapple is GS_Ready

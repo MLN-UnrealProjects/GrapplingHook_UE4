@@ -87,10 +87,6 @@ UGrapplingHookComponent::UGrapplingHookComponent()
 
 	RetractTime = 0.f;
 }
-void UGrapplingHookComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	ResetComponentState();
-}
 EGrapplingHookActivation UGrapplingHookComponent::GetActivationFlag() const
 {
 	return static_cast<EGrapplingHookActivation>(Activation);
@@ -183,7 +179,7 @@ bool UGrapplingHookComponent::ActivateSwing()
 	Capsule->SetSimulatePhysics(true);
 	MoveComponent->SetActive(false);
 
-	bool bValid;
+	bool bValid = true;
 	SwingConstraint->SetWorldLocation(GetGrappleEndLocation(bValid), false, (FHitResult*)nullptr, ETeleportType::TeleportPhysics);
 	SwingConstraint->SetConstrainedComponents(GrappledObject, NAME_None, Capsule, NAME_None);
 	SwingConstraint->UpdateConstraintFrames();
@@ -261,7 +257,7 @@ void UGrapplingHookComponent::UpdateRetractGrapple(const float Deltatime)
 	bool RetractOver = true;
 	if (Hook)
 	{
-		bool bValid;
+		bool bValid = true;
 		const FVector StartLocation = GetGrappleStartLocation(bValid);
 		if (!bValid)
 		{
@@ -384,7 +380,7 @@ void UGrapplingHookComponent::LaunchGrapple()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Instigator = Owner;
 	SpawnParams.Owner = Owner;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	AActor* const SpawnedActor = World->SpawnActor(HookClass.Get(), &Cable->GetComponentTransform(), SpawnParams);
 
@@ -406,7 +402,7 @@ void UGrapplingHookComponent::LaunchGrapple()
 	Hook->ReleaseContrainedBody();
 	Hook->MaxDistance = BreakDistance;
 	Cable->SetVisibility(true, true);
-	Hook->SetCable(Cable);
+	Hook->StartSimulation(Cable);
 
 	if (IsUFlagNotSet(Activation, EGrapplingHookActivation::GA_Extending))
 	{
@@ -601,7 +597,7 @@ void UGrapplingHookComponent::StopGrapple()
 		return;
 	}
 
-	bool bValid;
+	bool bValid = true;
 	RetractTime = 0.f;
 	CurrentRetractDuration = BreakDistance == 0.f ? RetractDuration : (RetractDuration * (GetGrappleLength(bValid) / BreakDistance));
 	RetractStartLocation = GetGrappleEndLocation(bValid);
@@ -616,6 +612,11 @@ void UGrapplingHookComponent::StopGrapple()
 		EndRetractPhase();
 	}
 }
+void UGrapplingHookComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+	ResetComponentState();
+}
 void UGrapplingHookComponent::EndRetractPhase()
 {
 	if (Cable)
@@ -624,10 +625,7 @@ void UGrapplingHookComponent::EndRetractPhase()
 	}
 	if (Hook)
 	{
-		if (!Hook->IsActorBeingDestroyed())
-		{
-			Hook->Destroy();
-		}
+		Hook->Destroy();
 		Hook = nullptr;
 	}
 
@@ -791,7 +789,7 @@ void UGrapplingHookComponent::RemoveActivationFlag(const EGrapplingHookActivatio
 
 float UGrapplingHookComponent::GetGrappleLength(bool& bOutValid) const
 {
-	bool bValid;
+	bool bValid = true;
 	const FVector End = GetGrappleEndLocation(bValid);
 	const FVector Start = GetGrappleStartLocation(bOutValid);
 	bOutValid = bOutValid && bValid;
@@ -818,14 +816,14 @@ void UGrapplingHookComponent::PlaySound(USoundBase* const Sound)
 		return;
 	}
 
-	bool bValid;
+	bool bValid = true;
 	UAISense_Hearing::ReportNoiseEvent(this, GetGrappleStartLocation(bValid), Loudness, NoiseInstigator, MaxRange, NoiseTag);
 }
 void UGrapplingHookComponent::UpdateOwnerLaunch(const float Deltatime)
 {
 	if (Owner)
 	{
-		bool bValid;
+		bool bValid = true;
 		Owner->LaunchCharacter(GetOwnerLaunchVelocity(Deltatime, LaunchSpeed, GetGrappleEndLocationWithLaunchOffset(bValid), Owner->GetActorLocation()), true, true);
 		if (!bValid)
 		{
@@ -848,7 +846,7 @@ bool UGrapplingHookComponent::UpdatePulledObject()
 	}
 	PullHandle->SetInterpolationSpeed(PullObjectInterpolationSpeed);
 
-	bool bValid;
+	bool bValid = true;
 	const FVector StartLocation = GetGrappleStartLocation(bValid);
 	if (!bValid)
 	{
@@ -869,7 +867,7 @@ void UGrapplingHookComponent::ActivatePull()
 	if (PullHandle->GrabbedComponent != GrappledObject)
 	{
 		PullHandle->ReleaseComponent();
-		bool bValid;
+		bool bValid = true;
 		PullHandle->GrabComponentAtLocation(GrappledObject, NAME_None, GetGrappleEndLocation(bValid));
 		if (!bValid)
 		{
@@ -955,7 +953,7 @@ void UGrapplingHookComponent::TickComponent(float DeltaTime, ELevelTick TickType
 		StopGrapple();
 	}
 
-	bool bValid;
+	bool bValid = true;
 	if (GetGrappleLength(bValid) > BreakDistance)
 	{
 		StopGrapple();
