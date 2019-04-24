@@ -11,6 +11,7 @@ public class MLN_GrapplingHook : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
                 "../Plugins/Runtime/CableComponent/Source/CableComponent/Classes",
+                System.IO.Path.Combine(ModuleDirectory, "Public"),
 				// ... add public include paths required here ...
 			}
 			);

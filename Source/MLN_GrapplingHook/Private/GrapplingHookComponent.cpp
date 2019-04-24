@@ -27,6 +27,9 @@ UGrapplingHookComponent::UGrapplingHookComponent()
 
 	PrimaryComponentTick.TickGroup = ETickingGroup::TG_PrePhysics;
 
+	CooldownTimerHandle.Invalidate();
+	GroundCheckTimerHandle.Invalidate();
+
 	bActivatedSwing = false;
 	bInitializeCoreOnBeginPlay = true;
 	bInitializeNonCoreOnBeginPlay = true;
