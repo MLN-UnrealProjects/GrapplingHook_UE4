@@ -38,7 +38,7 @@ UGrapplingHookComponent::UGrapplingHookComponent()
 
 	LaunchSpeed = 250.f;
 	LaunchCooldown = 2.f;
-	OffsetZPercentage = -0.5f;
+	OffsetZPercentage = 0.f;
 
 	PullMaxObjectMass = 50.f;
 	PullObjectInterpolationSpeed = 5.0f;

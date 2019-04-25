@@ -16,9 +16,6 @@ AProjectileHook::AProjectileHook()
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement"));
 	if (ProjectileMovement)
 	{
-		AddInstanceComponent(ProjectileMovement);
-		ProjectileMovement->RegisterComponent();
-
 		ProjectileMovement->bEditableWhenInherited = true;
 		ProjectileMovement->InitialSpeed = 3000.f;
 		ProjectileMovement->MaxSpeed = 0.f;
@@ -33,8 +30,6 @@ AProjectileHook::AProjectileHook()
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	if (CollisionComponent)
 	{
-		AddInstanceComponent(CollisionComponent);
-		CollisionComponent->RegisterComponent();
 		SetRootComponent(CollisionComponent);
 
 		CollisionComponent->SetUseCCD(true);
